@@ -6,6 +6,7 @@ import (
 	"github.com/SawitProRecruitment/UserService/generated"
 	"github.com/SawitProRecruitment/UserService/handler"
 	"github.com/SawitProRecruitment/UserService/repository"
+	"github.com/SawitProRecruitment/UserService/usecase"
 
 	"github.com/labstack/echo/v4"
 )
@@ -26,7 +27,8 @@ func main() {
 
 func newServer() *handler.Server {
 	repo := repository.NewRepository(repository.NewRepositoryOptions{Dsn: conf.DatabaseURL})
-	opts := handler.NewServerOptions{Repository: repo}
+	ucase := usecase.NewUserUsecase(usecase.UserUsecaseOptions{Repository: repo})
+	opts := handler.NewServerOptions{Usecase: ucase}
 
 	return handler.NewServer(opts)
 }

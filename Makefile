@@ -25,6 +25,7 @@ generate: generated generate_mocks
 
 generated: api.yml
 	@echo "Generating files..."
+	rm -rf ./generated
 	mkdir generated || true
 	oapi-codegen --package generated -generate types,server,spec $< > generated/api.gen.go
 

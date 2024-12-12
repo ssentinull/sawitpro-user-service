@@ -16,3 +16,27 @@ func (s *Server) Hello(ctx echo.Context, params generated.HelloParams) error {
 	resp.Message = fmt.Sprintf("Hello User %d", params.Id)
 	return ctx.JSON(http.StatusOK, resp)
 }
+
+func (s *Server) RegisterUser(ctx echo.Context) error {
+	req := generated.RegisterUserJSONRequestBody{}
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid input"})
+	}
+
+	user, err := s.Usecase.CreateUser(ctx.Request().Context(), req)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, "")
+	}
+
+	resp := generated.RegisterUserResponse{
+		Success: true,
+		Message: "successfully created user",
+		Data: &struct {
+			Id int "json:\"id\""
+		}{
+			Id: int(user.Id),
+		},
+	}
+
+	return ctx.JSON(http.StatusCreated, resp)
+}
