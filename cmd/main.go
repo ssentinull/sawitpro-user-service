@@ -1,7 +1,7 @@
 package main
 
 import (
-	"os"
+	"log"
 
 	"github.com/SawitProRecruitment/UserService/generated"
 	"github.com/SawitProRecruitment/UserService/handler"
@@ -10,22 +10,23 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+func init() {
+	if err := loadConfig(); err != nil {
+		log.Fatal("error loading .env: ", err)
+	}
+}
+
 func main() {
 	e := echo.New()
-
-	var server generated.ServerInterface = newServer()
+	server := newServer()
 
 	generated.RegisterHandlers(e, server)
-	e.Logger.Fatal(e.Start(":1323"))
+	e.Logger.Fatal(e.Start(":" + conf.ServicePort))
 }
 
 func newServer() *handler.Server {
-	dbDsn := os.Getenv("DATABASE_URL")
-	var repo repository.RepositoryInterface = repository.NewRepository(repository.NewRepositoryOptions{
-		Dsn: dbDsn,
-	})
-	opts := handler.NewServerOptions{
-		Repository: repo,
-	}
+	repo := repository.NewRepository(repository.NewRepositoryOptions{Dsn: conf.DatabaseURL})
+	opts := handler.NewServerOptions{Repository: repo}
+
 	return handler.NewServer(opts)
 }

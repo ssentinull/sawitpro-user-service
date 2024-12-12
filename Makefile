@@ -15,6 +15,9 @@ init: generate
 	go mod tidy
 	go mod vendor
 
+run:
+	go run cmd/*.go
+
 test:
 	go test -short -coverprofile coverage.out -v ./...
 
