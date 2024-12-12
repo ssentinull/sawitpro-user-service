@@ -41,6 +41,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  # TODO: use /v1/api prefix
   /users:
     post:
       summary: Register a new user
