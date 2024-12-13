@@ -34,7 +34,7 @@ func loadConfig() (err error) {
 	conf.ServicePort = viper.GetString("SERVICE_PORT")
 	conf.DatabaseURL = viper.GetString("DATABASE_URL")
 	conf.Auth.JWTExpiryDuration = viper.GetDuration("JWT_EXPIRY_DURATION")
-	conf.Auth.PrivateKeyPath = viper.GetString("PRIVATE_KEY_PATH")
+	conf.Auth.JWTSecretKey = viper.GetString("JWT_SECRET_KEY")
 
 	return nil
 }

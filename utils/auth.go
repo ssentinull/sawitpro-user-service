@@ -5,8 +5,6 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"os"
-	"strconv"
 	"time"
 
 	"github.com/SawitProRecruitment/UserService/model"
@@ -14,6 +12,7 @@ import (
 )
 
 type AuthInterface interface {
+	LoadKeys() (*rsa.PrivateKey, *rsa.PublicKey, error)
 	GenerateJWT(user model.User) (string, error)
 }
 
@@ -23,7 +22,7 @@ type Auth struct {
 
 type AuthOptions struct {
 	JWTExpiryDuration time.Duration
-	PrivateKeyPath    string
+	JWTSecretKey      string
 }
 
 func InitAuth(opt AuthOptions) AuthInterface {
@@ -31,16 +30,29 @@ func InitAuth(opt AuthOptions) AuthInterface {
 	return auth
 }
 
+func (a Auth) LoadKeys() (*rsa.PrivateKey, *rsa.PublicKey, error) {
+	pemString := fmt.Sprintf("-----BEGIN RSA PRIVATE KEY-----\n%s\n-----END RSA PRIVATE KEY-----", a.opt.JWTSecretKey)
+	block, _ := pem.Decode([]byte(pemString))
+	key, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	privKey := (key).(*rsa.PrivateKey)
+	pubKey := &privKey.PublicKey
+
+	return privKey, pubKey, nil
+}
+
 func (a Auth) GenerateJWT(user model.User) (string, error) {
-	privateKey, err := a.loadPrivateKey()
+	privateKey, _, err := a.LoadKeys()
 	if err != nil {
 		return "", err
 	}
 
 	claims := jwt.MapClaims{
-		"sub": strconv.FormatInt(user.Id, 10),
-		"iat": time.Now(),
-		"exp": time.Now().Add(a.opt.JWTExpiryDuration),
+		"user_id":    user.Id,
+		"expires_at": time.Now().Add(a.opt.JWTExpiryDuration).UnixMilli(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
@@ -50,25 +62,4 @@ func (a Auth) GenerateJWT(user model.User) (string, error) {
 	}
 
 	return signedToken, nil
-}
-
-func (a Auth) loadPrivateKey() (*rsa.PrivateKey, error) {
-	privateKeyBytes, err := os.ReadFile(a.opt.PrivateKeyPath)
-	if err != nil {
-		return nil, err
-	}
-
-	block, _ := pem.Decode(privateKeyBytes)
-	if block == nil {
-		return nil, fmt.Errorf("failed to parse PEM block containing the private key")
-	}
-
-	key, err := x509.ParsePKCS8PrivateKey(block.Bytes)
-	if err != nil {
-		return nil, err
-	}
-
-	privateKey := (key).(*rsa.PrivateKey)
-
-	return privateKey, nil
 }
