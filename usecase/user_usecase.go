@@ -6,6 +6,8 @@ import (
 	"github.com/SawitProRecruitment/UserService/generated"
 	"github.com/SawitProRecruitment/UserService/model"
 	"github.com/SawitProRecruitment/UserService/repository"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserUsecase struct {
@@ -22,8 +24,18 @@ func NewUserUsecase(opts UserUsecaseOptions) *UserUsecase {
 }
 
 func (u UserUsecase) CreateUser(ctx context.Context, payload generated.RegisterUserJSONRequestBody) (model.User, error) {
+	// TODO: check if email is duplicate
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(payload.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return model.User{}, err
+	}
+
+	payload.Password = string(hashedPassword)
+
 	userId, err := u.Repository.CreateUser(ctx, payload)
 	if err != nil {
+		// TODO: implement stacktrace
 		return model.User{}, err
 	}
 
