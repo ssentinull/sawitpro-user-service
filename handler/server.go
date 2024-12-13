@@ -5,13 +5,18 @@ import (
 )
 
 type Server struct {
-	Usecase usecase.UsecaseInterface
+	AuthUsecase usecase.AuthUsecaseInterface
+	UserUsecase usecase.UserUsecaseInterface
 }
 
 type NewServerOptions struct {
-	Usecase usecase.UsecaseInterface
+	AuthUsecase usecase.AuthUsecaseInterface
+	UserUsecase usecase.UserUsecaseInterface
 }
 
 func NewServer(opts NewServerOptions) *Server {
-	return &Server{Usecase: opts.Usecase}
+	return &Server{
+		AuthUsecase: opts.AuthUsecase,
+		UserUsecase: opts.UserUsecase,
+	}
 }

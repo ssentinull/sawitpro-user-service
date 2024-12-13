@@ -18,6 +18,38 @@ func (s *Server) Hello(ctx echo.Context, params generated.HelloParams) error {
 	return ctx.JSON(http.StatusOK, resp)
 }
 
+func (s *Server) AuthLogin(ctx echo.Context) error {
+	req := generated.AuthLoginJSONRequestBody{}
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, generated.ErrorResponse{
+			Success: false,
+			Message: "Invalid Input.",
+		})
+	}
+
+	user, jwt, err := s.AuthUsecase.LoginUser(ctx.Request().Context(), req)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, generated.ErrorResponse{
+			Success: false,
+			Message: err.Error(),
+		})
+	}
+
+	resp := generated.AuthLoginResponse{
+		Success: true,
+		Message: "successfully logged-in user",
+		Data: &struct {
+			Id  int    "json:\"id\""
+			Jwt string "json:\"jwt\""
+		}{
+			Id:  int(user.Id),
+			Jwt: jwt,
+		},
+	}
+
+	return ctx.JSON(http.StatusOK, resp)
+}
+
 func (s *Server) RegisterUser(ctx echo.Context) error {
 	req := generated.RegisterUserJSONRequestBody{}
 	if err := ctx.Bind(&req); err != nil {
@@ -34,9 +66,13 @@ func (s *Server) RegisterUser(ctx echo.Context) error {
 		})
 	}
 
-	user, err := s.Usecase.CreateUser(ctx.Request().Context(), req)
+	// TODO: implement stacktrace
+	user, err := s.UserUsecase.CreateUser(ctx.Request().Context(), req)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, "")
+		return ctx.JSON(http.StatusInternalServerError, generated.ErrorResponse{
+			Success: false,
+			Message: err.Error(),
+		})
 	}
 
 	resp := generated.RegisterUserResponse{

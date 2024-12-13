@@ -7,6 +7,10 @@ import (
 	"github.com/SawitProRecruitment/UserService/model"
 )
 
-type UsecaseInterface interface {
+type AuthUsecaseInterface interface {
+	LoginUser(ctx context.Context, payload generated.AuthLoginJSONRequestBody) (model.User, string, error)
+}
+
+type UserUsecaseInterface interface {
 	CreateUser(ctx context.Context, payload generated.RegisterUserJSONRequestBody) (model.User, error)
 }

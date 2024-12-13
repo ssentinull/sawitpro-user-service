@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/SawitProRecruitment/UserService/utils"
 	"github.com/spf13/viper"
 )
 
@@ -10,7 +11,8 @@ var (
 
 type Config struct {
 	ServicePort string
-	DatabaseURL string
+	DatabaseURL string // REFACTOR: move this to options in repository
+	Auth        utils.AuthOptions
 }
 
 func loadConfig() (err error) {
@@ -31,6 +33,8 @@ func loadConfig() (err error) {
 
 	conf.ServicePort = viper.GetString("SERVICE_PORT")
 	conf.DatabaseURL = viper.GetString("DATABASE_URL")
+	conf.Auth.JWTExpiryDuration = viper.GetDuration("JWT_EXPIRY_DURATION")
+	conf.Auth.PrivateKeyPath = viper.GetString("PRIVATE_KEY_PATH")
 
 	return nil
 }
