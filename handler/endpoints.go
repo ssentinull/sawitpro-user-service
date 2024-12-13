@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/SawitProRecruitment/UserService/generated"
+	"github.com/SawitProRecruitment/UserService/utils"
 	"github.com/labstack/echo/v4"
 )
 
@@ -20,7 +21,17 @@ func (s *Server) Hello(ctx echo.Context, params generated.HelloParams) error {
 func (s *Server) RegisterUser(ctx echo.Context) error {
 	req := generated.RegisterUserJSONRequestBody{}
 	if err := ctx.Bind(&req); err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid input"})
+		return ctx.JSON(http.StatusBadRequest, generated.ErrorResponse{
+			Success: false,
+			Message: "Invalid Input.",
+		})
+	}
+
+	if isPayloadValid, errorMessage := utils.IsRegisterUserPayloadValid(req); !isPayloadValid {
+		return ctx.JSON(http.StatusBadRequest, generated.ErrorResponse{
+			Success: false,
+			Message: errorMessage,
+		})
 	}
 
 	user, err := s.Usecase.CreateUser(ctx.Request().Context(), req)
