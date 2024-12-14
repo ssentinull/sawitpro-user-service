@@ -28,9 +28,20 @@ func (r *Repository) CreateUser(ctx context.Context, payload generated.RegisterU
 	return id, nil
 }
 
-func (r *Repository) GetUserByPhoneNumber(ctx context.Context, phoneNumbber string) (model.User, error) {
+func (r *Repository) GetUserById(ctx context.Context, id int64) (model.User, error) {
 	user := model.User{}
-	err := r.Db.QueryRowContext(ctx, "SELECT id, full_name, phone_number, password FROM users WHERE phone_number = $1;", phoneNumbber).
+	err := r.Db.QueryRowContext(ctx, "SELECT id, full_name, phone_number, password FROM users WHERE id = $1;", id).
+		Scan(&user.Id, &user.FullName, &user.PhoneNumber, &user.Password)
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
+}
+
+func (r *Repository) GetUserByPhoneNumber(ctx context.Context, phoneNumber string) (model.User, error) {
+	user := model.User{}
+	err := r.Db.QueryRowContext(ctx, "SELECT id, full_name, phone_number, password FROM users WHERE phone_number = $1;", phoneNumber).
 		Scan(&user.Id, &user.FullName, &user.PhoneNumber, &user.Password)
 	if err != nil {
 		return user, err

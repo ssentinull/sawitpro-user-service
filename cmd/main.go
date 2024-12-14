@@ -32,13 +32,14 @@ func newServer() *handler.Server {
 	repo := repository.NewRepository(repository.NewRepositoryOptions{Dsn: conf.DatabaseURL})
 	authUsecase := usecase.NewAuthUsecase(usecase.AuthUsecaseOptions{
 		Repository: repo,
-		Auth:       auth,
+		AuthUtil:   auth,
 	})
 
 	userUsecase := usecase.NewUserUsecase(usecase.UserUsecaseOptions{Repository: repo})
 	opts := handler.NewServerOptions{
 		AuthUsecase: authUsecase,
 		UserUsecase: userUsecase,
+		AuthUtil:    auth,
 	}
 
 	return handler.NewServer(opts)

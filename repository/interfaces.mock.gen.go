@@ -14,6 +14,7 @@ import (
 	reflect "reflect"
 
 	generated "github.com/SawitProRecruitment/UserService/generated"
+	model "github.com/SawitProRecruitment/UserService/model"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -69,4 +70,48 @@ func (m *MockRepositoryInterface) GetTestById(ctx context.Context, input GetTest
 func (mr *MockRepositoryInterfaceMockRecorder) GetTestById(ctx, input any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTestById", reflect.TypeOf((*MockRepositoryInterface)(nil).GetTestById), ctx, input)
+}
+
+// GetUserById mocks base method.
+func (m *MockRepositoryInterface) GetUserById(ctx context.Context, id int64) (model.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserById", ctx, id)
+	ret0, _ := ret[0].(model.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserById indicates an expected call of GetUserById.
+func (mr *MockRepositoryInterfaceMockRecorder) GetUserById(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserById", reflect.TypeOf((*MockRepositoryInterface)(nil).GetUserById), ctx, id)
+}
+
+// GetUserByPhoneNumber mocks base method.
+func (m *MockRepositoryInterface) GetUserByPhoneNumber(ctx context.Context, phoneNumber string) (model.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserByPhoneNumber", ctx, phoneNumber)
+	ret0, _ := ret[0].(model.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserByPhoneNumber indicates an expected call of GetUserByPhoneNumber.
+func (mr *MockRepositoryInterfaceMockRecorder) GetUserByPhoneNumber(ctx, phoneNumber any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByPhoneNumber", reflect.TypeOf((*MockRepositoryInterface)(nil).GetUserByPhoneNumber), ctx, phoneNumber)
+}
+
+// IncrementUserLoginCount mocks base method.
+func (m *MockRepositoryInterface) IncrementUserLoginCount(ctx context.Context, id int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IncrementUserLoginCount", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// IncrementUserLoginCount indicates an expected call of IncrementUserLoginCount.
+func (mr *MockRepositoryInterfaceMockRecorder) IncrementUserLoginCount(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IncrementUserLoginCount", reflect.TypeOf((*MockRepositoryInterface)(nil).IncrementUserLoginCount), ctx, id)
 }

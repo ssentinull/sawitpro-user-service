@@ -97,8 +97,32 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /users/profile:
+    get:
+      summary: Get user profile.
+      operationId: getUserProfile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Success get user profile
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/GetUserProfileResponse"
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     AuthLoginRequest:
       type: object
@@ -165,6 +189,29 @@ components:
           properties:
             id:
               type: integer
+    GetUserProfileResponse:
+      type: object
+      required:
+        - success
+        - message
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          required:
+            - id
+            - full_name
+            - phone_number
+          properties:
+            id:
+              type: integer
+            full_name:
+              type: string
+            phone_number:
+              type: string
     HelloResponse:
       type: object
       required:

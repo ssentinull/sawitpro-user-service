@@ -4,6 +4,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"time"
 
@@ -12,8 +13,10 @@ import (
 )
 
 type AuthInterface interface {
-	LoadKeys() (*rsa.PrivateKey, *rsa.PublicKey, error)
-	GenerateJWT(user model.User) (string, error)
+	LoadKeys() (*rsa.PrivateKey, *rsa.PublicKey, error) // REFACTOR: save private & public key in auth struct
+	GenerateJWTToken(user model.User) (string, error)
+	ValidateJWTToken(tokenStr string) error
+	GetUserId(tokenStr string) (int64, error)
 }
 
 type Auth struct {
@@ -44,7 +47,7 @@ func (a Auth) LoadKeys() (*rsa.PrivateKey, *rsa.PublicKey, error) {
 	return privKey, pubKey, nil
 }
 
-func (a Auth) GenerateJWT(user model.User) (string, error) {
+func (a Auth) GenerateJWTToken(user model.User) (string, error) {
 	privateKey, _, err := a.LoadKeys()
 	if err != nil {
 		return "", err
@@ -62,4 +65,49 @@ func (a Auth) GenerateJWT(user model.User) (string, error) {
 	}
 
 	return signedToken, nil
+}
+
+func (a Auth) ValidateJWTToken(tokenStr string) error {
+	claims, err := a.getClaims(tokenStr)
+	if err != nil {
+		return err
+	}
+
+	expiration := int64(claims["expires_at"].(float64))
+	if expiration < time.Now().UnixMilli() {
+		return errors.New("token expired")
+	}
+
+	return nil
+}
+
+func (a Auth) GetUserId(tokenStr string) (int64, error) {
+	claims, err := a.getClaims(tokenStr)
+	if err != nil {
+		return 0, err
+	}
+
+	userId := int64(claims["user_id"].(float64))
+
+	return userId, nil
+}
+
+func (a Auth) getClaims(tokenStr string) (jwt.MapClaims, error) {
+	_, publicKey, err := a.LoadKeys()
+	if err != nil {
+		return jwt.MapClaims{}, err
+	}
+
+	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
+			return nil, errors.New("invalid algorithm")
+		}
+		return publicKey, nil
+	})
+	if err != nil {
+		return jwt.MapClaims{}, err
+	}
+
+	claims, _ := token.Claims.(jwt.MapClaims)
+	return claims, nil
 }

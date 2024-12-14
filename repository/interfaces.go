@@ -14,6 +14,7 @@ import (
 type RepositoryInterface interface {
 	GetTestById(ctx context.Context, input GetTestByIdInput) (output GetTestByIdOutput, err error)
 	CreateUser(ctx context.Context, payload generated.RegisterUserJSONRequestBody) (int64, error)
+	GetUserById(ctx context.Context, id int64) (model.User, error)
 	GetUserByPhoneNumber(ctx context.Context, phoneNumber string) (model.User, error)
 	IncrementUserLoginCount(ctx context.Context, id int64) error
 }

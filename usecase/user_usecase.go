@@ -47,3 +47,13 @@ func (u UserUsecase) CreateUser(ctx context.Context, payload generated.RegisterU
 
 	return user, nil
 }
+
+func (u UserUsecase) GetUserProfile(ctx context.Context, userId int64) (model.User, error) {
+	user, err := u.Repository.GetUserById(ctx, userId)
+	if err != nil {
+		// TODO: implement stacktrace
+		return model.User{}, err
+	}
+
+	return user, nil
+}

@@ -1,11 +1,14 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/SawitProRecruitment/UserService/generated"
 	"github.com/SawitProRecruitment/UserService/utils"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -86,4 +89,43 @@ func (s *Server) RegisterUser(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusCreated, resp)
+}
+
+func (s *Server) GetUserProfile(ctx echo.Context) error {
+	tokenStr := ctx.Request().Header.Get("authorization")
+	idx := strings.Index(tokenStr, " ")
+	if tokenStr == "" || idx < 0 {
+		return errors.New("invalid jwt token")
+	}
+
+	tokenStr = tokenStr[idx+1:]
+	if err := s.AuthUtil.ValidateJWTToken(tokenStr); err != nil {
+		return err
+	}
+
+	userId, err := s.AuthUtil.GetUserId(tokenStr)
+	if err != nil {
+		return err
+	}
+
+	user, err := s.UserUsecase.GetUserProfile(ctx.Request().Context(), userId)
+	if err != nil {
+		return err
+	}
+
+	resp := generated.GetUserProfileResponse{
+		Success: true,
+		Message: "successfully get user profile",
+		Data: &struct {
+			FullName    string "json:\"full_name\""
+			Id          int    "json:\"id\""
+			PhoneNumber string "json:\"phone_number\""
+		}{
+			Id:          int(user.Id),
+			FullName:    user.FullName,
+			PhoneNumber: user.PhoneNumber,
+		},
+	}
+
+	return ctx.JSON(http.StatusOK, resp)
 }

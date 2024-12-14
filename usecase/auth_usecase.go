@@ -13,18 +13,18 @@ import (
 
 type AuthUsecase struct {
 	Repository repository.RepositoryInterface
-	Auth       utils.AuthInterface
+	AuthUtil   utils.AuthInterface
 }
 
 type AuthUsecaseOptions struct {
 	Repository repository.RepositoryInterface
-	Auth       utils.AuthInterface
+	AuthUtil   utils.AuthInterface
 }
 
 func NewAuthUsecase(opts AuthUsecaseOptions) *AuthUsecase {
 	u := &AuthUsecase{
 		Repository: opts.Repository,
-		Auth:       opts.Auth,
+		AuthUtil:   opts.AuthUtil,
 	}
 
 	return u
@@ -40,7 +40,7 @@ func (u AuthUsecase) LoginUser(ctx context.Context, payload generated.AuthLoginJ
 		return model.User{}, "", err
 	}
 
-	jwt, err := u.Auth.GenerateJWT(user)
+	jwt, err := u.AuthUtil.GenerateJWTToken(user)
 	if err != nil {
 		return model.User{}, "", err
 	}
