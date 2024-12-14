@@ -17,4 +17,5 @@ type RepositoryInterface interface {
 	GetUserById(ctx context.Context, id int64) (model.User, error)
 	GetUserByPhoneNumber(ctx context.Context, phoneNumber string) (model.User, error)
 	IncrementUserLoginCount(ctx context.Context, id int64) error
+	UpdateUserProfile(ctx context.Context, id int64, payload generated.UpdateUserProfileJSONRequestBody) error
 }

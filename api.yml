@@ -101,6 +101,8 @@ paths:
     get:
       summary: Get user profile.
       operationId: getUserProfile
+      tags:
+        - User
       security:
         - BearerAuth: []
       responses:
@@ -112,6 +114,39 @@ paths:
                 $ref: "#/components/schemas/GetUserProfileResponse"
         '403':
           description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      summary: Update user profile.
+      operationId: updateUserProfile
+      tags:
+        - User
+      security:
+        - BearerAuth: []
+      requestBody:
+        description: Update user details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserRequest"
+      responses:
+        '200':
+          description: Success update user profile
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/UpdateUserProfileResponse"
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        '409':
+          description: Conflict
           content:
             application/json:
               schema:
@@ -152,6 +187,18 @@ components:
         password:
           type: string
           description: User's password
+    UpdateUserRequest:
+      type: object
+      required:
+        - full_name
+        - phone_number
+      properties:
+        full_name:
+          type: string
+          description: User's full name
+        phone_number:
+          type: string
+          description: User's phone number
     AuthLoginResponse:
       type: object
       required:
@@ -212,6 +259,16 @@ components:
               type: string
             phone_number:
               type: string
+    UpdateUserProfileResponse:
+      type: object
+      required:
+        - success
+        - message
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
     HelloResponse:
       type: object
       required:

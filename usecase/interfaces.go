@@ -14,4 +14,5 @@ type AuthUsecaseInterface interface {
 type UserUsecaseInterface interface {
 	CreateUser(ctx context.Context, payload generated.RegisterUserJSONRequestBody) (model.User, error)
 	GetUserProfile(ctx context.Context, userId int64) (model.User, error)
+	UpdateUserProfile(ctx context.Context, userId int64, payload generated.UpdateUserProfileJSONRequestBody) error
 }

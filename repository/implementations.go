@@ -58,3 +58,28 @@ func (r *Repository) IncrementUserLoginCount(ctx context.Context, id int64) erro
 
 	return nil
 }
+
+func (r *Repository) UpdateUserProfile(ctx context.Context, id int64, payload generated.UpdateUserProfileJSONRequestBody) error {
+
+	switch {
+	case payload.FullName != "" && payload.PhoneNumber != "":
+		query := "UPDATE users SET full_name = $1, phone_number = $2 WHERE id = $3;"
+		if err := r.Db.QueryRow(query, payload.FullName, payload.PhoneNumber, id).Err(); err != nil {
+			return err
+		}
+
+	case payload.FullName != "":
+		query := "UPDATE users SET full_name = $1 WHERE id = $2;"
+		if err := r.Db.QueryRow(query, payload.FullName, id).Err(); err != nil {
+			return err
+		}
+
+	case payload.PhoneNumber != "":
+		query := "UPDATE users SET phone_number = $1 WHERE id = $2;"
+		if err := r.Db.QueryRow(query, payload.PhoneNumber, id).Err(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}

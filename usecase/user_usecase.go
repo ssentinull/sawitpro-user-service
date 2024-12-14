@@ -2,6 +2,8 @@ package usecase
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 
 	"github.com/SawitProRecruitment/UserService/generated"
 	"github.com/SawitProRecruitment/UserService/model"
@@ -56,4 +58,32 @@ func (u UserUsecase) GetUserProfile(ctx context.Context, userId int64) (model.Us
 	}
 
 	return user, nil
+}
+
+func (u UserUsecase) UpdateUserProfile(ctx context.Context, userId int64, payload generated.UpdateUserProfileJSONRequestBody) error {
+	user, err := u.Repository.GetUserById(ctx, userId)
+	if err != nil {
+		return err
+	}
+
+	if user.Id <= 0 {
+		return errors.New("user doesnt exist")
+	}
+
+	if payload.PhoneNumber != "" && payload.PhoneNumber != user.PhoneNumber {
+		userByPhoneNumber, err := u.Repository.GetUserByPhoneNumber(ctx, payload.PhoneNumber)
+		if err != nil && err != sql.ErrNoRows {
+			return err
+		}
+
+		if userByPhoneNumber.Id > 0 {
+			return errors.New("phone number is used by another user")
+		}
+	}
+
+	if err := u.Repository.UpdateUserProfile(ctx, userId, payload); err != nil {
+		return err
+	}
+
+	return nil
 }

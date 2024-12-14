@@ -129,3 +129,42 @@ func (s *Server) GetUserProfile(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, resp)
 }
+
+func (s *Server) UpdateUserProfile(ctx echo.Context) error {
+	tokenStr := ctx.Request().Header.Get("authorization")
+	idx := strings.Index(tokenStr, " ")
+	if tokenStr == "" || idx < 0 {
+		return errors.New("invalid jwt token")
+	}
+
+	tokenStr = tokenStr[idx+1:]
+	if err := s.AuthUtil.ValidateJWTToken(tokenStr); err != nil {
+		return err
+	}
+
+	userId, err := s.AuthUtil.GetUserId(tokenStr)
+	if err != nil {
+		return err
+	}
+
+	// TODO: validate phone number and name
+
+	req := generated.UpdateUserProfileJSONRequestBody{}
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, generated.ErrorResponse{
+			Success: false,
+			Message: "Invalid Input.",
+		})
+	}
+
+	if err = s.UserUsecase.UpdateUserProfile(ctx.Request().Context(), userId, req); err != nil {
+		return err
+	}
+
+	resp := generated.UpdateUserProfileResponse{
+		Success: true,
+		Message: "successfully update user profile",
+	}
+
+	return ctx.JSON(http.StatusOK, resp)
+}
