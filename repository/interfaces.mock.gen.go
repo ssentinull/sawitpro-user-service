@@ -57,21 +57,6 @@ func (mr *MockRepositoryInterfaceMockRecorder) CreateUser(ctx, payload any) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockRepositoryInterface)(nil).CreateUser), ctx, payload)
 }
 
-// GetTestById mocks base method.
-func (m *MockRepositoryInterface) GetTestById(ctx context.Context, input GetTestByIdInput) (GetTestByIdOutput, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTestById", ctx, input)
-	ret0, _ := ret[0].(GetTestByIdOutput)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetTestById indicates an expected call of GetTestById.
-func (mr *MockRepositoryInterfaceMockRecorder) GetTestById(ctx, input any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTestById", reflect.TypeOf((*MockRepositoryInterface)(nil).GetTestById), ctx, input)
-}
-
 // GetUserById mocks base method.
 func (m *MockRepositoryInterface) GetUserById(ctx context.Context, id int64) (model.User, error) {
 	m.ctrl.T.Helper()
@@ -114,4 +99,18 @@ func (m *MockRepositoryInterface) IncrementUserLoginCount(ctx context.Context, i
 func (mr *MockRepositoryInterfaceMockRecorder) IncrementUserLoginCount(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IncrementUserLoginCount", reflect.TypeOf((*MockRepositoryInterface)(nil).IncrementUserLoginCount), ctx, id)
+}
+
+// UpdateUserProfile mocks base method.
+func (m *MockRepositoryInterface) UpdateUserProfile(ctx context.Context, id int64, payload generated.UpdateUserProfileJSONRequestBody) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUserProfile", ctx, id, payload)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateUserProfile indicates an expected call of UpdateUserProfile.
+func (mr *MockRepositoryInterfaceMockRecorder) UpdateUserProfile(ctx, id, payload any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserProfile", reflect.TypeOf((*MockRepositoryInterface)(nil).UpdateUserProfile), ctx, id, payload)
 }
