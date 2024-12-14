@@ -20,11 +20,18 @@ func (s *Server) AuthLogin(ctx echo.Context) error {
 		})
 	}
 
+	if isPayloadValid, errorMessage := utils.IsAuthLoginPayloadValid(req); !isPayloadValid {
+		return ctx.JSON(http.StatusBadRequest, generated.ErrorResponse{
+			Success: false,
+			Message: errorMessage,
+		})
+	}
+
 	user, jwt, err := s.AuthUsecase.LoginUser(ctx.Request().Context(), req)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, generated.ErrorResponse{
+		return ctx.JSON(int(utils.GetCode(err)), generated.ErrorResponse{
 			Success: false,
-			Message: err.Error(),
+			Message: utils.GetMessage(err),
 		})
 	}
 

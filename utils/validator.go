@@ -7,6 +7,18 @@ import (
 	"github.com/SawitProRecruitment/UserService/generated"
 )
 
+func IsAuthLoginPayloadValid(payload generated.AuthLoginJSONRequestBody) (bool, string) {
+	isPayloadValid := true
+	errorMessages := make([]string, 0)
+
+	if isValid := IsStartWithCountryCode(payload.PhoneNumber, "+62"); !isValid {
+		isPayloadValid = false
+		errorMessages = append(errorMessages, "phone_number field must start with +62")
+	}
+
+	return isPayloadValid, strings.Join(errorMessages, ", ")
+}
+
 func IsRegisterUserPayloadValid(payload generated.RegisterUserJSONRequestBody) (bool, string) {
 	isPayloadValid := true
 	errorMessages := make([]string, 0)
