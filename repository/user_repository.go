@@ -7,6 +7,7 @@ import (
 
 	"github.com/SawitProRecruitment/UserService/generated"
 	"github.com/SawitProRecruitment/UserService/model"
+
 	_ "github.com/lib/pq"
 )
 
@@ -15,19 +16,11 @@ type UserRepository struct {
 }
 
 type UserRepositoryOptions struct {
-	Dsn string
+	DB *sql.DB
 }
 
 func NewUserRepository(opts UserRepositoryOptions) *UserRepository {
-	// REFACTOR: init db in main.go
-	db, err := sql.Open("postgres", opts.Dsn)
-	if err != nil {
-		panic(err)
-	}
-
-	return &UserRepository{
-		Db: db,
-	}
+	return &UserRepository{Db: opts.DB}
 }
 
 func (r *UserRepository) CreateUser(ctx context.Context, payload generated.RegisterUserJSONRequestBody) (int64, error) {

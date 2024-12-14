@@ -11,7 +11,7 @@ var (
 
 type Config struct {
 	ServicePort string
-	DatabaseURL string // REFACTOR: move this to options in repository
+	Database    utils.DBOptions
 	Auth        utils.AuthOptions
 }
 
@@ -32,7 +32,7 @@ func loadConfig() (err error) {
 	}
 
 	conf.ServicePort = viper.GetString("SERVICE_PORT")
-	conf.DatabaseURL = viper.GetString("DATABASE_URL")
+	conf.Database.DSN = viper.GetString("DATABASE_DSN")
 	conf.Auth.JWTExpiryDuration = viper.GetDuration("JWT_EXPIRY_DURATION")
 	conf.Auth.JWTSecretKey = viper.GetString("JWT_SECRET_KEY")
 

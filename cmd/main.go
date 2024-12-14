@@ -30,12 +30,17 @@ func main() {
 }
 
 func newServer() (*handler.Server, error) {
+	DB, err := utils.InitDB(conf.Database)
+	if err != nil {
+		return nil, err
+	}
+
 	auth, err := utils.InitAuth(conf.Auth)
 	if err != nil {
 		return nil, err
 	}
 
-	userRepo := repository.NewUserRepository(repository.UserRepositoryOptions{Dsn: conf.DatabaseURL})
+	userRepo := repository.NewUserRepository(repository.UserRepositoryOptions{DB: DB})
 	authUsecase := usecase.NewAuthUsecase(usecase.AuthUsecaseOptions{
 		UserRepository: userRepo,
 		AuthUtil:       auth,
