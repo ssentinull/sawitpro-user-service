@@ -91,22 +91,34 @@ func (s *Server) GetUserProfile(ctx echo.Context) error {
 	tokenStr := ctx.Request().Header.Get("authorization")
 	idx := strings.Index(tokenStr, " ")
 	if tokenStr == "" || idx < 0 {
-		return errors.New("invalid jwt token")
+		return ctx.JSON(http.StatusBadRequest, generated.ErrorResponse{
+			Success: false,
+			Message: "Invalid JWT Token",
+		})
 	}
 
 	tokenStr = tokenStr[idx+1:]
 	if err := s.AuthUtil.ValidateJWTToken(tokenStr); err != nil {
-		return err
+		return ctx.JSON(http.StatusBadRequest, generated.ErrorResponse{
+			Success: false,
+			Message: "Invalid JWT Token",
+		})
 	}
 
 	userId, err := s.AuthUtil.GetUserId(tokenStr)
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusBadRequest, generated.ErrorResponse{
+			Success: false,
+			Message: "Invalid JWT Token",
+		})
 	}
 
 	user, err := s.UserUsecase.GetUserProfile(ctx.Request().Context(), userId)
 	if err != nil {
-		return err
+		return ctx.JSON(int(utils.GetCode(err)), generated.ErrorResponse{
+			Success: false,
+			Message: utils.GetMessage(err),
+		})
 	}
 
 	resp := generated.GetUserProfileResponse{

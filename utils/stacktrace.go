@@ -13,12 +13,13 @@ type errorMessage map[ErrorCode]string
 
 var (
 	errorMessages = errorMessage{
-		http.StatusInternalServerError: `Internal Server Error. Please Call Administrator.`,
-		http.StatusNotFound:            `Record Does Not Exist. Please Validate Your Input Or Contact Administrator.`,
 		http.StatusBadRequest:          `Invalid Input. Please Validate Your Input.`,
 		http.StatusUnauthorized:        `Unauthorized Access. You are not authorized to access this resource.`,
-		http.StatusUnprocessableEntity: `Unprocessable Entity. This entity can not be processed.`,
+		http.StatusForbidden:           `Forbidden Access. You are forbidden to access this resource`,
+		http.StatusNotFound:            `Record Does Not Exist. Please Validate Your Input Or Contact Administrator.`,
 		http.StatusConflict:            `Record Has Existed and Must Be Unique. Please Validate Your Input Or Contact Administrator.`,
+		http.StatusUnprocessableEntity: `Unprocessable Entity. This entity can not be processed.`,
+		http.StatusInternalServerError: `Internal Server Error. Please Call Administrator.`,
 	}
 )
 
