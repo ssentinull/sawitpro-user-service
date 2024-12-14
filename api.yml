@@ -44,6 +44,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   # TODO: use /v1/api prefix
   /users:
@@ -73,6 +85,19 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /users/profile:
     get:
       summary: Get user profile.
@@ -182,18 +207,23 @@ components:
         - message
       properties:
         success:
+          x-order: 1
           type: boolean
         message:
+          x-order: 2
           type: string
         data:
+          x-order: 3
           type: object
           required:
             - id
             - jwt
           properties:
             id:
+              x-order: 1
               type: integer
             jwt:
+              x-order: 1
               type: string
     RegisterUserResponse:
       type: object
@@ -202,10 +232,13 @@ components:
         - message
       properties:
         success:
+          x-order: 1
           type: boolean
         message:
+          x-order: 2
           type: string
         data:
+          x-order: 3
           type: object
           required:
             - id
@@ -219,10 +252,13 @@ components:
         - message
       properties:
         success:
+          x-order: 1
           type: boolean
         message:
+          x-order: 2
           type: string
         data:
+          x-order: 3
           type: object
           required:
             - id
@@ -230,10 +266,13 @@ components:
             - phone_number
           properties:
             id:
+              x-order: 1
               type: integer
             full_name:
+              x-order: 2
               type: string
             phone_number:
+              x-order: 3
               type: string
     UpdateUserProfileResponse:
       type: object
@@ -242,8 +281,10 @@ components:
         - message
       properties:
         success:
+          x-order: 1
           type: boolean
         message:
+          x-order: 2
           type: string
     ErrorResponse:
       type: object
@@ -252,6 +293,8 @@ components:
         - message
       properties:
         success:
+          x-order: 1
           type: boolean
         message:
+          x-order: 2
           type: string

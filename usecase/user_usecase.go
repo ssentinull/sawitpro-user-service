@@ -4,10 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"net/http"
 
 	"github.com/SawitProRecruitment/UserService/generated"
 	"github.com/SawitProRecruitment/UserService/model"
 	"github.com/SawitProRecruitment/UserService/repository"
+	"github.com/SawitProRecruitment/UserService/utils"
+	"github.com/labstack/gommon/log"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -26,19 +30,28 @@ func NewUserUsecase(opts UserUsecaseOptions) *UserUsecase {
 }
 
 func (u UserUsecase) CreateUser(ctx context.Context, payload generated.RegisterUserJSONRequestBody) (model.User, error) {
-	// TODO: check if email is duplicate
+	existingUser, err := u.Repository.GetUserByPhoneNumber(ctx, payload.PhoneNumber)
+	if err != nil && err != sql.ErrNoRows {
+		log.Error(err)
+		return model.User{}, utils.WrapWithCode(err, utils.ErrorCode(http.StatusInternalServerError), "")
+	}
+
+	if existingUser.Id > 0 {
+		err = fmt.Errorf("user with phone number %s already exist", payload.PhoneNumber)
+		log.Error(err)
+		return model.User{}, utils.WrapWithCode(err, utils.ErrorCode(http.StatusConflict), "")
+	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(payload.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return model.User{}, err
+		log.Error(err)
+		return model.User{}, utils.WrapWithCode(err, utils.ErrorCode(http.StatusInternalServerError), "")
 	}
 
 	payload.Password = string(hashedPassword)
-
 	userId, err := u.Repository.CreateUser(ctx, payload)
 	if err != nil {
-		// TODO: implement stacktrace
-		return model.User{}, err
+		return model.User{}, utils.WrapWithCode(err, utils.ErrorCode(http.StatusInternalServerError), "")
 	}
 
 	user := model.User{

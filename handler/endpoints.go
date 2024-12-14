@@ -66,12 +66,11 @@ func (s *Server) RegisterUser(ctx echo.Context) error {
 		})
 	}
 
-	// TODO: implement stacktrace
 	user, err := s.UserUsecase.CreateUser(ctx.Request().Context(), req)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, generated.ErrorResponse{
+		return ctx.JSON(int(utils.GetCode(err)), generated.ErrorResponse{
 			Success: false,
-			Message: err.Error(),
+			Message: utils.GetMessage(err),
 		})
 	}
 
@@ -114,8 +113,8 @@ func (s *Server) GetUserProfile(ctx echo.Context) error {
 		Success: true,
 		Message: "successfully get user profile",
 		Data: &struct {
-			FullName    string "json:\"full_name\""
 			Id          int    "json:\"id\""
+			FullName    string "json:\"full_name\""
 			PhoneNumber string "json:\"phone_number\""
 		}{
 			Id:          int(user.Id),
