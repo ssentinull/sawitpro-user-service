@@ -40,10 +40,13 @@ func newServer() (*handler.Server, error) {
 		return nil, err
 	}
 
+	crypt := utils.InitCrypt()
+
 	userRepo := repository.NewUserRepository(repository.UserRepositoryOptions{DB: DB})
 	authUsecase := usecase.NewAuthUsecase(usecase.AuthUsecaseOptions{
 		UserRepository: userRepo,
 		AuthUtil:       auth,
+		CryptUtil:      crypt,
 	})
 
 	userUsecase := usecase.NewUserUsecase(usecase.UserUsecaseOptions{UserRepository: userRepo})

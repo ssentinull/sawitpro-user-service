@@ -29,10 +29,9 @@ generated: api.yml
 	mkdir generated || true
 	oapi-codegen --package generated -generate types,server,spec $< > generated/api.gen.go
 
-INTERFACES_GO_FILES := $(shell find repository -name "interfaces.go")
-INTERFACES_GEN_GO_FILES := $(INTERFACES_GO_FILES:%.go=%.mock.gen.go)
-
-generate_mocks: $(INTERFACES_GEN_GO_FILES)
-$(INTERFACES_GEN_GO_FILES): %.mock.gen.go: %.go
-	@echo "Generating mocks $@ for $<"
-	mockgen -source=$< -destination=$@ -package=$(shell basename $(dir $<))
+generate_mocks: 
+	@rm -rf ./mocks
+	@mockgen -destination=mocks/repository.go -source=repository/interfaces.go -package=mocks RepositoryInterface
+	@mockgen -destination=mocks/usecase.go -source=usecase/interfaces.go -package=mocks UsecaseInterface
+	@mockgen -destination=mocks/utils/crypt.go -source=utils/crypt.go -package=mocks CryptInterface
+	@mockgen -destination=mocks/utils/auth.go -source=utils/auth.go -package=mocks AuthInterface

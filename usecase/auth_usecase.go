@@ -11,23 +11,25 @@ import (
 	"github.com/SawitProRecruitment/UserService/utils"
 
 	"github.com/labstack/gommon/log"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthUsecase struct {
 	UserRepository repository.UserRepositoryInterface
 	AuthUtil       utils.AuthInterface
+	CryptUtil      utils.CryptInterface
 }
 
 type AuthUsecaseOptions struct {
 	UserRepository repository.UserRepositoryInterface
 	AuthUtil       utils.AuthInterface
+	CryptUtil      utils.CryptInterface
 }
 
 func NewAuthUsecase(opts AuthUsecaseOptions) *AuthUsecase {
 	u := &AuthUsecase{
 		UserRepository: opts.UserRepository,
 		AuthUtil:       opts.AuthUtil,
+		CryptUtil:      opts.CryptUtil,
 	}
 
 	return u
@@ -43,7 +45,7 @@ func (u AuthUsecase) LoginUser(ctx context.Context, payload generated.AuthLoginJ
 		return model.User{}, "", utils.WrapWithCode(err, utils.ErrorCode(http.StatusInternalServerError), "")
 	}
 
-	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.Password)); err != nil {
+	if err = u.CryptUtil.CompareHashAndPassword([]byte(user.Password), []byte(payload.Password)); err != nil {
 		log.Error(err)
 		return model.User{}, "", utils.WrapWithCode(err, utils.ErrorCode(http.StatusUnauthorized), "")
 	}
