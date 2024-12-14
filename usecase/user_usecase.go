@@ -17,14 +17,20 @@ import (
 
 type UserUsecase struct {
 	UserRepository repository.UserRepositoryInterface
+	CryptUtil      utils.CryptInterface
 }
 
 type UserUsecaseOptions struct {
 	UserRepository repository.UserRepositoryInterface
+	CryptUtil      utils.CryptInterface
 }
 
 func NewUserUsecase(opts UserUsecaseOptions) *UserUsecase {
-	u := &UserUsecase{UserRepository: opts.UserRepository}
+	u := &UserUsecase{
+		UserRepository: opts.UserRepository,
+		CryptUtil:      opts.CryptUtil,
+	}
+
 	return u
 }
 
@@ -41,7 +47,7 @@ func (u UserUsecase) CreateUser(ctx context.Context, payload generated.RegisterU
 		return model.User{}, utils.WrapWithCode(err, utils.ErrorCode(http.StatusConflict), "")
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(payload.Password), bcrypt.DefaultCost)
+	hashedPassword, err := u.CryptUtil.GenerateFromPassword([]byte(payload.Password), bcrypt.DefaultCost)
 	if err != nil {
 		log.Error(err)
 		return model.User{}, utils.WrapWithCode(err, utils.ErrorCode(http.StatusInternalServerError), "")

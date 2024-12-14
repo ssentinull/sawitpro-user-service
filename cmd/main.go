@@ -49,7 +49,11 @@ func newServer() (*handler.Server, error) {
 		CryptUtil:      crypt,
 	})
 
-	userUsecase := usecase.NewUserUsecase(usecase.UserUsecaseOptions{UserRepository: userRepo})
+	userUsecase := usecase.NewUserUsecase(usecase.UserUsecaseOptions{
+		UserRepository: userRepo,
+		CryptUtil:      crypt,
+	})
+
 	opts := handler.NewServerOptions{
 		AuthUsecase: authUsecase,
 		UserUsecase: userUsecase,
