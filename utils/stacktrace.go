@@ -109,8 +109,7 @@ func GetMessage(err error) string {
 
 func (st *stacktrace) Error() string {
 	if st != nil {
-		return fmt.Sprint(st)
+		return st.cause.Error()
 	}
-
 	return ""
 }

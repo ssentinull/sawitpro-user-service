@@ -35,13 +35,13 @@ func newServer() (*handler.Server, error) {
 		return nil, err
 	}
 
-	repo := repository.NewRepository(repository.NewRepositoryOptions{Dsn: conf.DatabaseURL})
+	userRepo := repository.NewUserRepository(repository.UserRepositoryOptions{Dsn: conf.DatabaseURL})
 	authUsecase := usecase.NewAuthUsecase(usecase.AuthUsecaseOptions{
-		Repository: repo,
-		AuthUtil:   auth,
+		UserRepository: userRepo,
+		AuthUtil:       auth,
 	})
 
-	userUsecase := usecase.NewUserUsecase(usecase.UserUsecaseOptions{Repository: repo})
+	userUsecase := usecase.NewUserUsecase(usecase.UserUsecaseOptions{UserRepository: userRepo})
 	opts := handler.NewServerOptions{
 		AuthUsecase: authUsecase,
 		UserUsecase: userUsecase,
