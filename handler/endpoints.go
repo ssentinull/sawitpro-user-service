@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"errors"
 	"net/http"
 	"strings"
 
@@ -142,20 +141,27 @@ func (s *Server) UpdateUserProfile(ctx echo.Context) error {
 	tokenStr := ctx.Request().Header.Get("authorization")
 	idx := strings.Index(tokenStr, " ")
 	if tokenStr == "" || idx < 0 {
-		return errors.New("invalid jwt token")
+		return ctx.JSON(http.StatusBadRequest, generated.ErrorResponse{
+			Success: false,
+			Message: "Invalid JWT Token",
+		})
 	}
 
 	tokenStr = tokenStr[idx+1:]
 	if err := s.AuthUtil.ValidateJWTToken(tokenStr); err != nil {
-		return err
+		return ctx.JSON(http.StatusBadRequest, generated.ErrorResponse{
+			Success: false,
+			Message: "Invalid JWT Token",
+		})
 	}
 
 	userId, err := s.AuthUtil.GetUserId(tokenStr)
 	if err != nil {
-		return err
+		return ctx.JSON(http.StatusBadRequest, generated.ErrorResponse{
+			Success: false,
+			Message: "Invalid JWT Token",
+		})
 	}
-
-	// TODO: validate phone number and name
 
 	req := generated.UpdateUserProfileJSONRequestBody{}
 	if err := ctx.Bind(&req); err != nil {
@@ -165,8 +171,18 @@ func (s *Server) UpdateUserProfile(ctx echo.Context) error {
 		})
 	}
 
+	if isPayloadValid, errorMessage := utils.IsUpdateUserProfilePayloadValid(req); !isPayloadValid {
+		return ctx.JSON(http.StatusBadRequest, generated.ErrorResponse{
+			Success: false,
+			Message: errorMessage,
+		})
+	}
+
 	if err = s.UserUsecase.UpdateUserProfile(ctx.Request().Context(), userId, req); err != nil {
-		return err
+		return ctx.JSON(int(utils.GetCode(err)), generated.ErrorResponse{
+			Success: false,
+			Message: utils.GetMessage(err),
+		})
 	}
 
 	resp := generated.UpdateUserProfileResponse{

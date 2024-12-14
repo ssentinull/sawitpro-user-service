@@ -63,3 +63,31 @@ func IsRegisterUserPayloadValid(payload generated.RegisterUserJSONRequestBody) (
 
 	return isPayloadValid, strings.Join(errorMessages, ", ")
 }
+
+func IsUpdateUserProfilePayloadValid(payload generated.UpdateUserProfileJSONRequestBody) (bool, string) {
+	isPayloadValid := true
+	errorMessages := make([]string, 0)
+
+	if payload.PhoneNumber != "" {
+		if isValid := IsStartWithCountryCode(payload.PhoneNumber, "+62"); !isValid {
+			isPayloadValid = false
+			errorMessages = append(errorMessages, "phone_number field must start with +62")
+		}
+
+		minPhoneLen, maxPhoneLen := 10, 13
+		if isValid := IsLengthBetweenRange(payload.PhoneNumber, minPhoneLen, maxPhoneLen); !isValid {
+			isPayloadValid = false
+			errorMessages = append(errorMessages, fmt.Sprintf("phone_number must be between %d to %d characters long", minPhoneLen, maxPhoneLen))
+		}
+	}
+
+	if payload.FullName != "" {
+		minNameLen, maxNameLen := 3, 60
+		if isValid := IsLengthBetweenRange(payload.FullName, minNameLen, maxNameLen); !isValid {
+			isPayloadValid = false
+			errorMessages = append(errorMessages, fmt.Sprintf("full_name must be between %d to %d characters long", minNameLen, maxNameLen))
+		}
+	}
+
+	return isPayloadValid, strings.Join(errorMessages, ", ")
+}

@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -51,6 +50,7 @@ func (u UserUsecase) CreateUser(ctx context.Context, payload generated.RegisterU
 	payload.Password = string(hashedPassword)
 	userId, err := u.Repository.CreateUser(ctx, payload)
 	if err != nil {
+		log.Error(err)
 		return model.User{}, utils.WrapWithCode(err, utils.ErrorCode(http.StatusInternalServerError), "")
 	}
 
@@ -66,6 +66,7 @@ func (u UserUsecase) CreateUser(ctx context.Context, payload generated.RegisterU
 func (u UserUsecase) GetUserProfile(ctx context.Context, userId int64) (model.User, error) {
 	user, err := u.Repository.GetUserById(ctx, userId)
 	if err != nil {
+		log.Error(err)
 		return model.User{}, utils.WrapWithCode(err, utils.ErrorCode(http.StatusForbidden), "")
 	}
 
@@ -75,26 +76,30 @@ func (u UserUsecase) GetUserProfile(ctx context.Context, userId int64) (model.Us
 func (u UserUsecase) UpdateUserProfile(ctx context.Context, userId int64, payload generated.UpdateUserProfileJSONRequestBody) error {
 	user, err := u.Repository.GetUserById(ctx, userId)
 	if err != nil {
-		return err
-	}
+		log.Error(err)
+		if err == sql.ErrNoRows {
+			return utils.WrapWithCode(err, utils.ErrorCode(http.StatusNotFound), "")
+		}
 
-	if user.Id <= 0 {
-		return errors.New("user doesnt exist")
+		return utils.WrapWithCode(err, utils.ErrorCode(http.StatusInternalServerError), "")
 	}
 
 	if payload.PhoneNumber != "" && payload.PhoneNumber != user.PhoneNumber {
-		userByPhoneNumber, err := u.Repository.GetUserByPhoneNumber(ctx, payload.PhoneNumber)
+		existingUser, err := u.Repository.GetUserByPhoneNumber(ctx, payload.PhoneNumber)
 		if err != nil && err != sql.ErrNoRows {
-			return err
+			log.Error(err)
+			return utils.WrapWithCode(err, utils.ErrorCode(http.StatusInternalServerError), "")
 		}
 
-		if userByPhoneNumber.Id > 0 {
-			return errors.New("phone number is used by another user")
+		if existingUser.Id > 0 {
+			err = fmt.Errorf("phone number is already used by another user")
+			log.Error(err)
+			return utils.WrapWithCode(err, utils.ErrorCode(http.StatusConflict), "")
 		}
 	}
 
 	if err := u.Repository.UpdateUserProfile(ctx, userId, payload); err != nil {
-		return err
+		return utils.WrapWithCode(err, utils.ErrorCode(http.StatusInternalServerError), "")
 	}
 
 	return nil
