@@ -13,14 +13,15 @@ import (
 )
 
 type AuthInterface interface {
-	LoadKeys() (*rsa.PrivateKey, *rsa.PublicKey, error) // REFACTOR: save private & public key in auth struct
 	GenerateJWTToken(user model.User) (string, error)
 	ValidateJWTToken(tokenStr string) error
 	GetUserId(tokenStr string) (int64, error)
 }
 
 type Auth struct {
-	opt AuthOptions
+	privateKey *rsa.PrivateKey
+	publicKey  *rsa.PublicKey
+	opt        AuthOptions
 }
 
 type AuthOptions struct {
@@ -28,38 +29,23 @@ type AuthOptions struct {
 	JWTSecretKey      string
 }
 
-func InitAuth(opt AuthOptions) AuthInterface {
+func InitAuth(opt AuthOptions) (AuthInterface, error) {
 	auth := Auth{opt: opt}
-	return auth
-}
-
-func (a Auth) LoadKeys() (*rsa.PrivateKey, *rsa.PublicKey, error) {
-	pemString := fmt.Sprintf("-----BEGIN RSA PRIVATE KEY-----\n%s\n-----END RSA PRIVATE KEY-----", a.opt.JWTSecretKey)
-	block, _ := pem.Decode([]byte(pemString))
-	key, err := x509.ParsePKCS8PrivateKey(block.Bytes)
-	if err != nil {
-		return nil, nil, err
+	if err := auth.loadKeys(); err != nil {
+		return nil, err
 	}
 
-	privKey := (key).(*rsa.PrivateKey)
-	pubKey := &privKey.PublicKey
-
-	return privKey, pubKey, nil
+	return auth, nil
 }
 
 func (a Auth) GenerateJWTToken(user model.User) (string, error) {
-	privateKey, _, err := a.LoadKeys()
-	if err != nil {
-		return "", err
-	}
-
 	claims := jwt.MapClaims{
 		"user_id":    user.Id,
 		"expires_at": time.Now().Add(a.opt.JWTExpiryDuration).UnixMilli(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
-	signedToken, err := token.SignedString(privateKey)
+	signedToken, err := token.SignedString(a.privateKey)
 	if err != nil {
 		return "", err
 	}
@@ -92,22 +78,40 @@ func (a Auth) GetUserId(tokenStr string) (int64, error) {
 	return userId, nil
 }
 
-func (a Auth) getClaims(tokenStr string) (jwt.MapClaims, error) {
-	_, publicKey, err := a.LoadKeys()
+func (a *Auth) loadKeys() error {
+	pemString := fmt.Sprintf("-----BEGIN RSA PRIVATE KEY-----\n%s\n-----END RSA PRIVATE KEY-----", a.opt.JWTSecretKey)
+	block, _ := pem.Decode([]byte(pemString))
+
+	key, err := x509.ParsePKCS8PrivateKey(block.Bytes)
 	if err != nil {
-		return jwt.MapClaims{}, err
+		return err
 	}
 
+	privKey, isErr := (key).(*rsa.PrivateKey)
+	if !isErr {
+		return errors.New("failed casting private key")
+	}
+
+	pubKey := &privKey.PublicKey
+	a.privateKey = privKey
+	a.publicKey = pubKey
+
+	return nil
+}
+
+func (a Auth) getClaims(tokenStr string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, errors.New("invalid algorithm")
 		}
-		return publicKey, nil
+		return a.publicKey, nil
 	})
+
 	if err != nil {
 		return jwt.MapClaims{}, err
 	}
 
 	claims, _ := token.Claims.(jwt.MapClaims)
+
 	return claims, nil
 }

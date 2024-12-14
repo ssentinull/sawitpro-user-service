@@ -20,14 +20,20 @@ func init() {
 
 func main() {
 	e := echo.New()
-	server := newServer()
+	server, err := newServer()
+	if err != nil {
+		panic(err)
+	}
 
 	generated.RegisterHandlers(e, server)
 	e.Logger.Fatal(e.Start(":" + conf.ServicePort))
 }
 
-func newServer() *handler.Server {
-	auth := utils.InitAuth(conf.Auth)
+func newServer() (*handler.Server, error) {
+	auth, err := utils.InitAuth(conf.Auth)
+	if err != nil {
+		return nil, err
+	}
 
 	repo := repository.NewRepository(repository.NewRepositoryOptions{Dsn: conf.DatabaseURL})
 	authUsecase := usecase.NewAuthUsecase(usecase.AuthUsecaseOptions{
@@ -42,5 +48,5 @@ func newServer() *handler.Server {
 		AuthUtil:    auth,
 	}
 
-	return handler.NewServer(opts)
+	return handler.NewServer(opts), nil
 }
