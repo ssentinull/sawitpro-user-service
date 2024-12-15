@@ -26,7 +26,7 @@ func main() {
 	}
 
 	generated.RegisterHandlers(e, server)
-	e.Logger.Fatal(e.Start(":" + conf.ServicePort))
+	e.Logger.Fatal(e.Start(":1323"))
 }
 
 func newServer() (*handler.Server, error) {

@@ -1,8 +1,11 @@
 package main
 
 import (
+	"os"
+	"time"
+
 	"github.com/SawitProRecruitment/UserService/utils"
-	"github.com/spf13/viper"
+	"github.com/joho/godotenv"
 )
 
 var (
@@ -10,31 +13,22 @@ var (
 )
 
 type Config struct {
-	ServicePort string
+	Environment string
 	Database    utils.DBOptions
 	Auth        utils.AuthOptions
 }
 
 func loadConfig() (err error) {
-	defer func() {
-		if errRecov := recover(); errRecov != nil {
-			err = errRecov.(error)
-		}
-	}()
+	godotenv.Load()
 
-	viper.AddConfigPath(".")
-	viper.SetConfigType("env")
-	viper.SetConfigFile(".env")
-	viper.AutomaticEnv()
+	conf.Database.DSN = os.Getenv("DATABASE_DSN")
+	conf.Auth.JWTSecretKey = os.Getenv("JWT_SECRET_KEY")
+	jwtExpiryDurationVar := os.Getenv("JWT_EXPIRY_DURATION")
 
-	if err := viper.ReadInConfig(); err != nil {
+	conf.Auth.JWTExpiryDuration, err = time.ParseDuration(jwtExpiryDurationVar)
+	if err != nil {
 		return err
 	}
-
-	conf.ServicePort = viper.GetString("SERVICE_PORT")
-	conf.Database.DSN = viper.GetString("DATABASE_DSN")
-	conf.Auth.JWTExpiryDuration = viper.GetDuration("JWT_EXPIRY_DURATION")
-	conf.Auth.JWTSecretKey = viper.GetString("JWT_SECRET_KEY")
 
 	return nil
 }

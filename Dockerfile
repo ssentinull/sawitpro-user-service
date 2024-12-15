@@ -1,13 +1,13 @@
 # Dockerfile definition for Backend application service.
 
 # From which image we want to build. This is basically our environment.
-FROM golang:1.19-alpine as Build
+FROM golang:1.20-alpine as Build
 
 # This will copy all the files in our repo to the inside the container at root location.
 COPY . .
 
 # Build our binary at root location.
-RUN GOPATH= go build -o /main cmd/main.go
+RUN GOPATH= go build -o /main cmd/*.go
 
 ####################################################################
 # This is the actual image that we will be using in production.
