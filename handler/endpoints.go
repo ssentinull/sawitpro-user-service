@@ -37,10 +37,7 @@ func (s *Server) AuthLogin(ctx echo.Context) error {
 	resp := generated.AuthLoginResponse{
 		Success: true,
 		Message: "successfully logged-in user",
-		Data: &struct {
-			Id  int    "json:\"id\""
-			Jwt string "json:\"jwt\""
-		}{
+		Data: &generated.AuthLoginResponseData{
 			Id:  int(user.Id),
 			Jwt: jwt,
 		},
@@ -76,11 +73,7 @@ func (s *Server) RegisterUser(ctx echo.Context) error {
 	resp := generated.RegisterUserResponse{
 		Success: true,
 		Message: "successfully created user",
-		Data: &struct {
-			Id int "json:\"id\""
-		}{
-			Id: int(user.Id),
-		},
+		Data:    &generated.RegisterUserResponseData{Id: int(user.Id)},
 	}
 
 	return ctx.JSON(http.StatusCreated, resp)
@@ -123,11 +116,7 @@ func (s *Server) GetUserProfile(ctx echo.Context) error {
 	resp := generated.GetUserProfileResponse{
 		Success: true,
 		Message: "successfully get user profile",
-		Data: &struct {
-			Id          int    "json:\"id\""
-			FullName    string "json:\"full_name\""
-			PhoneNumber string "json:\"phone_number\""
-		}{
+		Data: &generated.GetUserProfileResponseData{
 			Id:          int(user.Id),
 			FullName:    user.FullName,
 			PhoneNumber: user.PhoneNumber,
