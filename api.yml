@@ -17,7 +17,7 @@ info:
 servers:
   - url: http://localhost
 paths:
-  /auth/login:
+  /v1/auth/login:
     post:
       summary: Login user
       description: Endpoint to login user.
@@ -57,8 +57,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-  # TODO: use /v1/api prefix
-  /users:
+  /v1/users:
     post:
       summary: Register a new user
       description: Endpoint to register a new user.
@@ -98,7 +97,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-  /users/profile:
+  /v1/users/profile:
     get:
       summary: Get user profile.
       operationId: getUserProfile
