@@ -28,7 +28,7 @@ func IsRegisterUserPayloadValid(payload generated.RegisterUserJSONRequestBody) (
 		errorMessages = append(errorMessages, "phone_number field must start with +62")
 	}
 
-	minPhoneLen, maxPhoneLen := 10, 13
+	minPhoneLen, maxPhoneLen := 10, 16
 	if isValid := IsLengthBetweenRange(payload.PhoneNumber, minPhoneLen, maxPhoneLen); !isValid {
 		isPayloadValid = false
 		errorMessages = append(errorMessages, fmt.Sprintf("phone_number must be between %d to %d characters long", minPhoneLen, maxPhoneLen))
@@ -74,7 +74,7 @@ func IsUpdateUserProfilePayloadValid(payload generated.UpdateUserProfileJSONRequ
 			errorMessages = append(errorMessages, "phone_number field must start with +62")
 		}
 
-		minPhoneLen, maxPhoneLen := 10, 13
+		minPhoneLen, maxPhoneLen := 10, 16
 		if isValid := IsLengthBetweenRange(payload.PhoneNumber, minPhoneLen, maxPhoneLen); !isValid {
 			isPayloadValid = false
 			errorMessages = append(errorMessages, fmt.Sprintf("phone_number must be between %d to %d characters long", minPhoneLen, maxPhoneLen))
